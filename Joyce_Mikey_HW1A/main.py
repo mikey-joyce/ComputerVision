@@ -64,6 +64,7 @@ def denormalize(img):
 if __name__ == '__main__':
     plots_dir = 'results/plots/'
     imgs_dir = 'results/images/'
+
     # Load in the test images!
     cat = cv2.imread('images/cat_crp.jpg', cv2.IMREAD_UNCHANGED)
     plot_rgb_hist(cat, title='Cat Histogram', fig_path=plots_dir+'cat_orig_hist.png')
