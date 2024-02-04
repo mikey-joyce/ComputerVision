@@ -47,13 +47,19 @@ def hybrid_img(blur_img, sharp_img, sigma=5.0):
     lowpass_sharp = cv2.filter2D(sharp_img, -1, gaussian)
     highpass_sharp = sharp_img - lowpass_sharp
 
+    blur_sharpened = blur_img + highpass_blur
+    sharp_sharpened = sharp_img + highpass_sharp
+
+    blur_sharpened = np.clip(blur_sharpened, 0, 1)
+    sharp_sharpened = np.clip(sharp_sharpened, 0, 1)
+
     hybrid_1 = highpass_sharp + lowpass_blur
     hybrid_2 = highpass_blur + lowpass_sharp
 
     hybrid_1 = np.clip(hybrid_1, 0, 1)
     hybrid_2 = np.clip(hybrid_2, 0, 1)
 
-    return hybrid_1, hybrid_2, lowpass_blur, highpass_blur, lowpass_sharp, highpass_sharp
+    return hybrid_1, hybrid_2, lowpass_blur, highpass_blur, lowpass_sharp, highpass_sharp, blur_sharpened, sharp_sharpened
 
 
 def denormalize(img):
@@ -73,14 +79,16 @@ if __name__ == '__main__':
     plot_rgb_hist(dog, title='Dog Histogram', fig_path=plots_dir+'dog_orig_hist.png')
 
     sig = 5.0
-    h1_img, h2_img, low_dog, high_dog, low_cat, high_cat = hybrid_img(dog, cat, sigma=sig)
+    h1_img, h2_img, low_dog, high_dog, low_cat, high_cat, sharp_dog, sharp_cat = hybrid_img(dog, cat, sigma=sig)
 
     h1_img = denormalize(h1_img)
     h2_img = denormalize(h2_img)
     low_dog = denormalize(low_dog)
     high_dog = denormalize(high_dog)
+    sharp_dog = denormalize(sharp_dog)
     low_cat = denormalize(low_cat)
     high_cat = denormalize(high_cat)
+    sharp_cat = denormalize(sharp_cat)
 
     cv2.imwrite(imgs_dir + 'hybrid_dog_cat_sig=' + str(sig) + '.png', h1_img)
     cv2.imwrite(imgs_dir + 'hybrid_cat_dog_sig=' + str(sig) + '.png', h2_img)
@@ -88,18 +96,23 @@ if __name__ == '__main__':
     cv2.imwrite(imgs_dir + 'low_cat.png', low_cat)
     cv2.imwrite(imgs_dir + 'high_dog.png', high_dog)
     cv2.imwrite(imgs_dir + 'high_cat.png', high_cat)
+    cv2.imwrite(imgs_dir + 'sharp_dog.png', sharp_dog)
+    cv2.imwrite(imgs_dir + 'sharp_cat.png', sharp_cat)
 
     plot_rgb_hist(low_cat, title='Cat Smoothed', fig_path=plots_dir+'cat_smooth_hist.png')
     plot_rgb_hist(low_dog, title='Dog Smoothed', fig_path=plots_dir+'dog_smooth_hist.png')
-    plot_rgb_hist(high_cat, title='Cat Sharpened', fig_path=plots_dir+'cat_sharp_hist.png')
-    plot_rgb_hist(high_dog, title='Dog Sharpened', fig_path=plots_dir+'dog_sharp_hist.png')
+    plot_rgb_hist(high_cat, title='Cat High Pass', fig_path=plots_dir+'cat_high_hist.png')
+    plot_rgb_hist(high_dog, title='Dog High Pass', fig_path=plots_dir+'dog_high_hist.png')
+    plot_rgb_hist(sharp_cat, title='Cat Sharpened', fig_path=plots_dir + 'cat_sharp_hist.png')
+    plot_rgb_hist(sharp_dog, title='Dog Sharpened', fig_path=plots_dir + 'dog_sharp_hist.png')
+
 
     plt.imshow(cv2.cvtColor(h1_img, cv2.COLOR_BGR2RGB))
     plt.title('Hybrid; sigma=' + str(sig))
     plt.show()
 
     sig = 20.0
-    h1_img, h2_img, low_dog, high_dog, low_cat, high_cat = hybrid_img(dog, cat, sigma=sig)
+    h1_img, h2_img, low_dog, high_dog, low_cat, high_cat, sharp_dog, sharp_cat = hybrid_img(dog, cat, sigma=sig)
 
     h1_img = denormalize(h1_img)
     h2_img = denormalize(h2_img)
