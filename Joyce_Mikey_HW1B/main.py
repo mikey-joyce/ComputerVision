@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from scipy import ndimage
 from scipy.ndimage import convolve
 import matplotlib.pyplot as plt
 
